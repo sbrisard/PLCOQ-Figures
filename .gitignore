@@ -130,3 +130,10 @@ dmypy.json
 
 # PyCharm configuration files
 .idea
+
+# LaTeX files
+labels.json
+*.aux
+*.log
+*.pdf
+*.tex
