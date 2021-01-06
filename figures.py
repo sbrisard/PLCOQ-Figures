@@ -1,11 +1,7 @@
-import datetime
-import inspect
 import json
-import subprocess
 
 import PyPDF2
 import cairo
-import jinja2
 import shapely.geometry
 
 import numpy as np
@@ -21,20 +17,6 @@ MM = 72.0 / 25.4
 def parse_palette(palette):
     values = [int(palette[i : i + 2], 16) / 255 for i in range(0, len(palette), 2)]
     return list(zip(values[0::3], values[1::3], values[2::3]))
-
-
-def run_jinja(basename, values):
-    env = jinja2.Environment(
-        variable_start_string="@",
-        variable_end_string="@",
-        comment_start_string="/*",
-        comment_end_string="*/",
-        loader=jinja2.FileSystemLoader("."),
-    )
-
-    template = env.get_template(basename + ".in")
-    with open(basename, "w", encoding="utf8") as f:
-        f.write(template.render(values))
 
 
 def project(xyz):
@@ -467,8 +449,6 @@ def fig20210105175723(params, basename):
     writer.addPage(page)
     with open(basename + ".pdf", "wb") as f:
         writer.write(f)
-
-    # run_jinja(basename + ".tex", values)
 
 
 if __name__ == "__main__":
