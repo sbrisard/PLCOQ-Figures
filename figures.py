@@ -8,6 +8,8 @@ import numpy as np
 
 import label
 
+from pycairo_utils import draw_polyline
+
 COS_30_DEG = 0.5 * np.sqrt(3)
 SIN_30_DEG = 0.5
 
@@ -25,15 +27,6 @@ def project(xyz):
     xy[..., 0] = COS_30_DEG * (xyz[..., 1] - xyz[..., 0])
     xy[..., 1] = xyz[..., 2] - SIN_30_DEG * (xyz[..., 0] + xyz[..., 1])
     return xy
-
-
-def draw_polyline(ctx, xy, move_to_first=True):
-    xy = np.asarray(xy)
-    first = 1 if move_to_first else 0
-    if move_to_first:
-        ctx.move_to(*xy[0])
-    for x_i, y_i in xy[first:]:
-        ctx.line_to(x_i, y_i)
 
 
 def diff_u(f, h=1e-4):
