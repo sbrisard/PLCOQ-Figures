@@ -89,11 +89,6 @@ def insert(latex, page, position, anchor):
     x, y = position
     page.mergeTranslatedPage(label, x - dx, y - dy)
 
-
-# Initialization code, to be executed each time the module is loaded
-basename(r"\(\Lambda(\Gamma)\)")
-basename(r"\(\Omega\)")
-
 # if __name__ == "__main__":
 #     mm = 72.0 / 25.4
 #     page = PyPDF2.PdfFileReader("fig20210105175723-bare.pdf").getPage(0)
