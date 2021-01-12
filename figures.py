@@ -56,6 +56,8 @@ class ShellWithSubSystem:
             )
         )
 
+        self.Γ_visible = self.Γ.exterior.difference(self.Σ)
+
     def pf_sup(self, uv):
         return project(self.shell.f_sup(uv))
 
@@ -70,8 +72,6 @@ class ShellWithSubSystem:
 
         iso_u = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v))
         iso_v = shapely.geometry.LineString(zip(self.u, repeat(self.v_cut)))
-
-        Γ_visible = self.Γ.exterior.difference(self.Σ)
 
         i = self.v >= self.v_cut
         AC = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v[i]))
@@ -118,7 +118,9 @@ class ShellWithSubSystem:
 
         ## Lateral face of sub-system
         ctx.set_source_rgb(*palette[1])
-        draw_polyline(ctx, chain(self.pf_inf(Γ_visible), self.pf_sup(Γ_visible)[::-1]))
+        draw_polyline(
+            ctx, chain(self.pf_inf(self.Γ_visible), self.pf_sup(self.Γ_visible)[::-1])
+        )
         ctx.close_path()
         ctx.fill()
 
@@ -172,7 +174,7 @@ class ShellWithSubSystem:
         ## Sub-system
         ctx.set_source_rgb(*palette[0])
         draw_polyline(ctx, self.pf_sup(self.Γ.exterior))
-        draw_polyline(ctx, self.pf_inf(Γ_visible))
+        draw_polyline(ctx, self.pf_inf(self.Γ_visible))
         ctx.stroke()
 
         ## Sub-system iso-[u, v] lines and fibers
@@ -183,7 +185,7 @@ class ShellWithSubSystem:
             draw_polyline(ctx, self.pf_sup(ls))
             ctx.line_to(*self.pf_inf(ls.coords[-1]))
 
-        for uv in (Γ_visible.coords[0], Γ_visible.coords[-1]):
+        for uv in (self.Γ_visible.coords[0], self.Γ_visible.coords[-1]):
             ctx.move_to(*self.pf_inf(uv))
             ctx.line_to(*self.pf_sup(uv))
         ctx.stroke()
