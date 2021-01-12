@@ -67,7 +67,7 @@ class ShellWithSubSystem:
     def pf_mid(self, uv):
         return project(self.shell.f_mid(uv))
 
-    def draw_bare(self, ctx, params):
+    def draw_bare(self, ctx, labels, params):
         palette = params["color"]["category20c"]
 
         iso_u = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v))
@@ -186,12 +186,10 @@ class ShellWithSubSystem:
             draw_line(ctx, *self.pf_inf(uv), *self.pf_sup(uv))
         ctx.stroke()
 
-    def gen_labels(self, ctx):
         u2d = ctx.user_to_device
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
-        labels = []
         dx, dy = 5.0, 5.0
 
         x1, y1 = self.pf_sup((self.u_min + dx, self.v_min + dy))
@@ -223,6 +221,27 @@ class ShellWithSubSystem:
 
         ctx.stroke()
         return labels
+
+    def draw(self, width, height, basename, params):
+        with cairo.PDFSurface(
+            basename + "-bare.pdf", width * MM, height * MM
+        ) as surface:
+            ctx = cairo.Context(surface)
+
+            ctx.scale(MM, MM)  # Default unit is mm
+            ctx.translate(0.5 * width, 0.5 * height)  # Place origin at center
+            ctx.scale(1.0, -1.0)  # y points upwards
+
+            labels = []
+            self.draw_bare(ctx, labels, params)
+
+        page = PyPDF2.PdfFileReader(basename + "-bare.pdf").getPage(0)
+        for label in labels:
+            label.insert(page)
+        writer = PyPDF2.PdfFileWriter()
+        writer.addPage(page)
+        with open(basename + ".pdf", "wb") as f:
+            writer.write(f)
 
 
 def fig20210105175723(params, basename):
@@ -256,26 +275,7 @@ def fig20210105175723(params, basename):
         u_cut,
         v_cut,
     )
-
-    with cairo.PDFSurface(basename + "-bare.pdf", width * MM, height * MM) as surface:
-        ctx = cairo.Context(surface)
-
-        ctx.scale(MM, MM)  # Default unit is mm
-        ctx.translate(0.5 * width, 0.5 * height)  # Place origin at center
-        ctx.scale(1.0, -1.0)  # y points upwards
-
-        drawing.draw_bare(ctx, params)
-        labels = drawing.gen_labels(ctx)
-
-    page = PyPDF2.PdfFileReader(basename + "-bare.pdf").getPage(0)
-
-    print(labels)
-    for label in labels:
-        label.insert(page)
-    writer = PyPDF2.PdfFileWriter()
-    writer.addPage(page)
-    with open(basename + ".pdf", "wb") as f:
-        writer.write(f)
+    drawing.draw(width, height, basename, params)
 
 
 if __name__ == "__main__":
