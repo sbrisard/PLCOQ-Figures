@@ -88,21 +88,19 @@ class ShellWithSubSystem:
         GH = GA.difference(self.Γ)
         BC = AC.difference(self.Γ)
 
-        # Filled areas
-
-        ## Upper face of outer system
+        # Upper face of outer system
         ctx.set_source_rgb(*palette[-1])
         draw_polyline(ctx, self.pf_sup(self.Σ.difference(self.Γ).exterior))
         ctx.close_path()
         ctx.fill()
 
-        ## Upper face of sub-system
+        # Upper face of sub-system
         ctx.set_source_rgb(*palette[3])
         draw_polyline(ctx, self.pf_sup(self.Γ.exterior))
         ctx.close_path()
         ctx.fill()
 
-        ## Lateral face of outer system
+        # Lateral face of outer system
         def draw_lateral(uv):
             draw_polyline(ctx, chain(self.pf_inf(uv), self.pf_sup(uv[::-1])))
             ctx.close_path()
@@ -116,7 +114,7 @@ class ShellWithSubSystem:
         draw_lateral(GH.coords)
         ctx.fill()
 
-        ## Lateral face of sub-system
+        # Lateral face of sub-system
         ctx.set_source_rgb(*palette[1])
         draw_polyline(
             ctx, chain(self.pf_inf(self.Γ_visible), self.pf_sup(self.Γ_visible)[::-1])
@@ -124,9 +122,7 @@ class ShellWithSubSystem:
         ctx.close_path()
         ctx.fill()
 
-        # Borders
-
-        ## Iso-lines, outer system
+        # Iso-lines, outer system
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
@@ -137,14 +133,14 @@ class ShellWithSubSystem:
                     draw_polyline(ctx, self.pf_sup(ls))
         ctx.stroke()
 
-        ## Upper and lower faces of outer system
+        # Upper and lower faces of outer system
         ctx.set_line_width(params["line width"]["normal"])
         draw_polyline(ctx, self.pf_sup(self.Σ.exterior.difference(self.Γ)))
         draw_polyline(ctx, chain(self.pf_inf(FG), self.pf_inf(GH)))
         draw_polyline(ctx, chain(self.pf_inf(BC), self.pf_inf(CD)))
         ctx.stroke()
 
-        ## Mid surface
+        # Mid surface
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(*palette[4])
         draw_polyline(
@@ -158,7 +154,7 @@ class ShellWithSubSystem:
         draw_polyline(ctx, chain(self.pf_mid(BC), self.pf_mid(CD)))
         ctx.stroke()
 
-        ## Fibers of outer system
+        # Fibers of outer system
         ctx.set_line_width(params["line width"]["normal"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
         for uv_i in [
@@ -171,13 +167,13 @@ class ShellWithSubSystem:
             ctx.line_to(*project(self.shell.f_sup(uv_i)))
         ctx.stroke()
 
-        ## Sub-system
+        # Sub-system
         ctx.set_source_rgb(*palette[0])
         draw_polyline(ctx, self.pf_sup(self.Γ.exterior))
         draw_polyline(ctx, self.pf_inf(self.Γ_visible))
         ctx.stroke()
 
-        ## Sub-system iso-[u, v] lines and fibers
+        # Sub-system iso-[u, v] lines and fibers
         ctx.set_line_width(params["line width"]["thin"])
 
         for iso in (iso_u, iso_v):
