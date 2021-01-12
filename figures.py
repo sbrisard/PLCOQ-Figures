@@ -56,17 +56,18 @@ class ShellWithSubSystem:
             )
         )
 
-    def draw(self, ctx, params):
+    def pf_sup(self, uv):
+        return project(self.shell.f_sup(uv))
+
+    def pf_inf(self, uv):
+        return project(self.shell.f_inf(uv))
+
+    def pf_mid(self, uv):
+        project(self.shell.f_mid(uv))
+
+    def draw_bare(self, ctx, params):
         palette = params["color"]["category20c"]
 
-        def pf_sup(uv):
-            return project(self.shell.f_sup(uv))
-
-        def pf_inf(uv):
-            return project(self.shell.f_inf(uv))
-
-        def pf_mid(uv):
-            return project(self.shell.f_mid(uv))
 
         u_min, u_max = np.min(self.u), np.max(self.u)
         v_min, v_max = np.min(self.v), np.max(self.v)
@@ -95,19 +96,19 @@ class ShellWithSubSystem:
 
         ## Upper face of outer system
         ctx.set_source_rgb(*palette[-1])
-        draw_polyline(ctx, pf_sup(self.Σ.difference(self.Γ).exterior))
+        draw_polyline(ctx, self.pf_sup(self.Σ.difference(self.Γ).exterior))
         ctx.close_path()
         ctx.fill()
 
         ## Upper face of sub-system
         ctx.set_source_rgb(*palette[3])
-        draw_polyline(ctx, pf_sup(self.Γ.exterior))
+        draw_polyline(ctx, self.pf_sup(self.Γ.exterior))
         ctx.close_path()
         ctx.fill()
 
         ## Lateral face of outer system
         def draw_lateral(uv):
-            draw_polyline(ctx, chain(pf_inf(uv), pf_sup(uv[::-1])))
+            draw_polyline(ctx, chain(self.pf_inf(uv), self.pf_sup(uv[::-1])))
             ctx.close_path()
 
         ctx.set_source_rgb(*palette[-2])
@@ -121,7 +122,7 @@ class ShellWithSubSystem:
 
         ## Lateral face of sub-system
         ctx.set_source_rgb(*palette[1])
-        draw_polyline(ctx, chain(pf_inf(Γ_visible), pf_sup(Γ_visible)[::-1]))
+        draw_polyline(ctx, chain(self.pf_inf(Γ_visible), self.pf_sup(Γ_visible)[::-1]))
         ctx.close_path()
         ctx.fill()
 
@@ -135,14 +136,14 @@ class ShellWithSubSystem:
             mls = iso.difference(self.Γ)
             for ls in mls:
                 if ls.coords[0][index] <= bound:
-                    draw_polyline(ctx, pf_sup(ls))
+                    draw_polyline(ctx, self.pf_sup(ls))
         ctx.stroke()
 
         ## Upper and lower faces of outer system
         ctx.set_line_width(params["line width"]["normal"])
-        draw_polyline(ctx, pf_sup(self.Σ.exterior.difference(self.Γ)))
-        draw_polyline(ctx, chain(pf_inf(FG), pf_inf(GH)))
-        draw_polyline(ctx, chain(pf_inf(BC), pf_inf(CD)))
+        draw_polyline(ctx, self.pf_sup(self.Σ.exterior.difference(self.Γ)))
+        draw_polyline(ctx, chain(self.pf_inf(FG), self.pf_inf(GH)))
+        draw_polyline(ctx, chain(self.pf_inf(BC), self.pf_inf(CD)))
         ctx.stroke()
 
         ## Mid surface
@@ -150,9 +151,9 @@ class ShellWithSubSystem:
         ctx.set_source_rgb(*palette[4])
         draw_polyline(
             ctx,
-            chain(pf_mid(FG), pf_mid(GH), pf_mid(self.Γ.exterior.difference(self.Σ))),
+            chain(self.pf_mid(FG), self.pf_mid(GH), self.pf_mid(self.Γ.exterior.difference(self.Σ))),
         )
-        draw_polyline(ctx, chain(pf_mid(BC), pf_mid(CD)))
+        draw_polyline(ctx, chain(self.pf_mid(BC), self.pf_mid(CD)))
         ctx.stroke()
 
         ## Fibers of outer system
@@ -170,8 +171,8 @@ class ShellWithSubSystem:
 
         ## Sub-system
         ctx.set_source_rgb(*palette[0])
-        draw_polyline(ctx, pf_sup(self.Γ.exterior))
-        draw_polyline(ctx, pf_inf(Γ_visible))
+        draw_polyline(ctx, self.pf_sup(self.Γ.exterior))
+        draw_polyline(ctx, self.pf_inf(Γ_visible))
         ctx.stroke()
 
         ## Sub-system iso-[u, v] lines and fibers
@@ -179,14 +180,16 @@ class ShellWithSubSystem:
 
         for iso in (iso_u, iso_v):
             ls = iso.intersection(self.Γ)
-            draw_polyline(ctx, pf_sup(ls))
-            ctx.line_to(*pf_inf(ls.coords[-1]))
+            draw_polyline(ctx, self.pf_sup(ls))
+            ctx.line_to(*self.pf_inf(ls.coords[-1]))
 
         for uv in (Γ_visible.coords[0], Γ_visible.coords[-1]):
-            ctx.move_to(*pf_inf(uv))
-            ctx.line_to(*pf_sup(uv))
+            ctx.move_to(*self.pf_inf(uv))
+            ctx.line_to(*self.pf_sup(uv))
         ctx.stroke()
 
+
+    def gen_labels(self, ctx):
         # Labels
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
@@ -194,12 +197,11 @@ class ShellWithSubSystem:
         labels = []
         dx, dy = 5.0, 5.0
 
-        x1, y1 = pf_sup((u_min + dx, v_min + dy))
+        x1, y1 = self.pf_sup((u_min + dx, v_min + dy))
         x2, y2 = x1 - dx, y1 + dy
         ctx.move_to(x1, y1)
         ctx.line_to(x2, y2)
 
-        # TODO: dirty trick -y to account for different orientations of y axis.
         label = Label(r"\(\Omega\)", ctx.user_to_device(x2, y2), (1.0, 0.0), False)
         labels.append(label)
 
@@ -272,7 +274,7 @@ def fig20210105175723(params, basename):
         ctx.translate(0.5 * width, 0.5 * height)  # Place origin at center
         ctx.scale(1.0, -1.0)  # y points upwards
 
-        labels = drawing.draw(ctx, params)
+        labels = drawing.draw_bare(ctx, params)
 
     page = PyPDF2.PdfFileReader(basename + "-bare.pdf").getPage(0)
 
