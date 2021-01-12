@@ -191,7 +191,7 @@ class ShellWithSubSystem:
         ctx.stroke()
 
     def gen_labels(self, ctx):
-        # Labels
+        u2d = ctx.user_to_device
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
@@ -202,36 +202,34 @@ class ShellWithSubSystem:
         x2, y2 = x1 - dx, y1 + dy
         ctx.move_to(x1, y1)
         ctx.line_to(x2, y2)
+        labels.append(Label(r"\(\Omega\)", u2d(x2, y2), (1.0, 0.0), False))
 
-        label = Label(r"\(\Omega\)", ctx.user_to_device(x2, y2), (1.0, 0.0), False)
-        labels.append(label)
+        x1, y1 = self.pf_mid((self.u_max, 0.5 * self.v_min))
+        x2, y2 = x1 - dx, y1 - dx
+        ctx.move_to(x1, y1)
+        ctx.line_to(x2, y2)
+        labels.append(Label(r"\(\Sigma\)", u2d(x2, y2), (1.0, 1.0), False))
 
-        # x1, y1 = pf_mid((u_max, 0.5 * v_min))
-        # x2, y2 = x1 - dx, y1 - dx
-        # values["xSigma"], values["ySigma"] = x2, y2
-        # ctx.move_to(x1, y1)
-        # ctx.line_to(x2, y2)
-        #
-        # x1, y1 = pf_mid(Γ_visible.interpolate(0.5, normalized=True))
-        # x2, y2 = x1 + dx, y1 - dy
-        # values["xGamma"], values["yGamma"] = x2, y2
-        # ctx.move_to(x1, y1)
-        # ctx.line_to(x2, y2)
-        #
-        # uv = Γ_visible.interpolate(0.25, normalized=True)
-        # x1, y1 = 0.5 * (pf_mid(uv) + pf_inf(uv))
-        # x2, y2 = x1 - dx, y1 - dy
-        # values["xLambdaGamma"], values["yLambdaGamma"] = x2, y2
-        # ctx.move_to(x1, y1)
-        # ctx.line_to(x2, y2)
-        #
-        # uv = Γ.exterior.interpolate(0.33, normalized=True)
-        # x1, y1 = 0.75 * pf_sup(uv)
-        # x2, y2 = x1 + dx, y1
-        # values["xOmegaGamma"], values["yOmegaGamma"] = x2, y2
-        # ctx.move_to(x1, y1)
-        # ctx.line_to(x2, y2)
-        #
+        x1, y1 = self.pf_mid(self.Γ_visible.interpolate(0.5, normalized=True))
+        x2, y2 = x1 + dx, y1 - dy
+        ctx.move_to(x1, y1)
+        ctx.line_to(x2, y2)
+        labels.append(Label(r"\(\Gamma\)", u2d(x2, y2), (0.0, 1.0), False))
+
+        uv = self.Γ_visible.interpolate(0.25, normalized=True)
+        x1, y1 = 0.5 * (self.pf_mid(uv) + self.pf_inf(uv))
+        x2, y2 = x1 - dx, y1 - dy
+        ctx.move_to(x1, y1)
+        ctx.line_to(x2, y2)
+        labels.append(Label(r"\(\Lambda(\Gamma)\)", u2d(x2, y2), (1.0, 1.0), False))
+
+        uv = self.Γ.exterior.interpolate(0.33, normalized=True)
+        x1, y1 = 0.75 * self.pf_sup(uv)
+        x2, y2 = x1 + dx, y1
+        ctx.move_to(x1, y1)
+        ctx.line_to(x2, y2)
+        labels.append(Label(r"\(\Omega(\Gamma)\)", u2d(x2, y2), (0.0, 0.5), False))
+
         ctx.stroke()
         return labels
 
@@ -275,7 +273,8 @@ def fig20210105175723(params, basename):
         ctx.translate(0.5 * width, 0.5 * height)  # Place origin at center
         ctx.scale(1.0, -1.0)  # y points upwards
 
-        labels = drawing.draw_bare(ctx, params)
+        drawing.draw_bare(ctx, params)
+        labels = drawing.gen_labels(ctx)
 
     page = PyPDF2.PdfFileReader(basename + "-bare.pdf").getPage(0)
 
