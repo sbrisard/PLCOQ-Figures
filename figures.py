@@ -147,7 +147,11 @@ class ShellWithSubSystem:
         ctx.set_source_rgb(*palette[4])
         draw_polyline(
             ctx,
-            chain(self.pf_mid(FG), self.pf_mid(GH), self.pf_mid(self.Γ.exterior.difference(self.Σ))),
+            chain(
+                self.pf_mid(FG),
+                self.pf_mid(GH),
+                self.pf_mid(self.Γ.exterior.difference(self.Σ)),
+            ),
         )
         draw_polyline(ctx, chain(self.pf_mid(BC), self.pf_mid(CD)))
         ctx.stroke()
@@ -183,7 +187,6 @@ class ShellWithSubSystem:
             ctx.move_to(*self.pf_inf(uv))
             ctx.line_to(*self.pf_sup(uv))
         ctx.stroke()
-
 
     def gen_labels(self, ctx):
         # Labels
