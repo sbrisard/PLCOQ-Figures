@@ -92,8 +92,8 @@ class Label:
         label = PyPDF2.PdfFileReader(self.basename + ".pdf").getPage(0)
         x1, y1, x2, y2 = [float(x) for x in label.mediaBox]
         x, y = self.position
-        if self.y_upwards:
-            y = page.mediaBox[3] - page.mediaBox[1] - y
+        if not self.y_upwards:
+            y = float(page.mediaBox[3]) - float(page.mediaBox[1]) - y
         x -= self.anchor[0] * (x2 - x1)
         y -= self.anchor[1] * (y2 - y1)
         page.mergeTranslatedPage(label, x, y)
