@@ -63,7 +63,7 @@ class ShellWithSubSystem:
         return project(self.shell.f_inf(uv))
 
     def pf_mid(self, uv):
-        project(self.shell.f_mid(uv))
+        return project(self.shell.f_mid(uv))
 
     def draw_bare(self, ctx, params):
         palette = params["color"]["category20c"]
