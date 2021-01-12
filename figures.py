@@ -6,7 +6,7 @@ import shapely.geometry
 
 import numpy as np
 
-import label
+import labelling
 
 from pycairo_utils import draw_polyline
 from geometry import *
@@ -289,7 +289,7 @@ def fig20210105175723(params, basename):
 
     print(labels)
     for latex, position, anchor in labels:
-        label.insert(latex, page, position, anchor)
+        labelling.insert(latex, page, position, anchor)
     writer = PyPDF2.PdfFileWriter()
     writer.addPage(page)
     with open(basename + ".pdf", "wb") as f:
