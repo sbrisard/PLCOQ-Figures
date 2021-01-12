@@ -74,33 +74,38 @@ def create(contents, labels):
     return basename
 
 
-def basename(contents):
-    labels = read_index()
-    if not contents in labels:
-        create(contents, labels)
-    return labels[contents]
+class Label:
+    def __init__(self, contents, position, anchor, y_upwards=True):
+        self.contents = contents
+        self.position = position
+        self.anchor = anchor
+        self.y_upwards = y_upwards
+
+    @property
+    def basename(self):
+        labels = read_index()
+        if not self.contents in labels:
+            create(self.contents, labels)
+        return labels[self.contents]
+
+    def insert(self, page):
+        label = PyPDF2.PdfFileReader(self.basename + ".pdf").getPage(0)
+        x1, y1, x2, y2 = [float(x) for x in label.mediaBox]
+        x, y = self.position
+        if self.y_upwards:
+            y = page.mediaBox[3] - page.mediaBox[1] - y
+        x -= self.anchor[0] * (x2 - x1)
+        y -= self.anchor[1] * (y2 - y1)
+        page.mergeTranslatedPage(label, x, y)
 
 
-def insert(latex, page, position, anchor):
-    label = PyPDF2.PdfFileReader(basename(latex) + ".pdf").getPage(0)
-    x1, y1, x2, y2 = [float(x) for x in label.mediaBox]
-    dx = anchor[0] * (x2 - x1)
-    dy = anchor[1] * (y2 - y1)
-    x, y = position
-    page.mergeTranslatedPage(label, x - dx, y - dy)
-
-# if __name__ == "__main__":
-#     mm = 72.0 / 25.4
-#     page = PyPDF2.PdfFileReader("fig20210105175723-bare.pdf").getPage(0)
-#
-#     x0 = 0.5 * float(page.mediaBox[0] + page.mediaBox[2])
-#     y0 = 0.5 * float(page.mediaBox[1] + page.mediaBox[3])
-#
-#     position = (x0 - 9.330127018922193 * mm, y0 + 20.570737201667704 * mm)
-#     anchor = (1.0, 0.0)
-#     insert(r"\(\Omega\)", page, position, anchor)
-#
-#     writer = PyPDF2.PdfFileWriter()
-#     writer.addPage(page)
-#     with open("test.pdf", "wb") as f:
-#         writer.write(f)
+def label_json_formatter(o):
+    if isinstance(o, Label):
+        return {
+            "contents": o.contents,
+            "position": o.position,
+            "anchor": o.anchor,
+            "y_upwards": o.y_upwards,
+        }
+    else:
+        raise TypeError()

@@ -10,6 +10,7 @@ import labelling
 
 from pycairo_utils import draw_polyline
 from geometry import *
+from labelling import Label
 
 MM = 72.0 / 25.4
 
@@ -212,7 +213,8 @@ class ShellWithSubSystem:
         ctx.line_to(x2, y2)
 
         # TODO: dirty trick -y to account for different orientations of y axis.
-        labels.append((r"\(\Omega\)", ctx.user_to_device(x2, -y2), (1.0, 0.0)))
+        label = Label(r"\(\Omega\)", ctx.user_to_device(x2, y2), (1.0, 0.0), False)
+        labels.append(label)
 
         # x1, y1 = pf_mid((u_max, 0.5 * v_min))
         # x2, y2 = x1 - dx, y1 - dx
