@@ -290,8 +290,8 @@ def fig20210105175723(params, basename):
     page = PyPDF2.PdfFileReader(basename + "-bare.pdf").getPage(0)
 
     print(labels)
-    for latex, position, anchor in labels:
-        labelling.insert(latex, page, position, anchor)
+    for label in labels:
+        label.insert(page)
     writer = PyPDF2.PdfFileWriter()
     writer.addPage(page)
     with open(basename + ".pdf", "wb") as f:
