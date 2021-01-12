@@ -1,5 +1,7 @@
 import json
 
+from itertools import repeat
+
 import PyPDF2
 import cairo
 import shapely.geometry
@@ -66,41 +68,22 @@ class ShellWithSubSystem:
         Γ = shapely.geometry.Polygon(self.uv_Γ)
         Σ = shapely.geometry.Polygon(self.uv_Σ)
 
-        iso_u = np.empty((self.v.shape[0], 2), dtype=np.float64)
-        iso_u[:, 0] = self.u_cut
-        iso_u[:, 1] = self.v
-        iso_u = shapely.geometry.LineString(iso_u)
-
-        iso_v = np.empty((self.u.shape[0], 2), dtype=np.float64)
-        iso_v[:, 0] = self.u
-        iso_v[:, 1] = self.v_cut
-        iso_v = shapely.geometry.LineString(iso_v)
+        iso_u = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v))
+        iso_v = shapely.geometry.LineString(zip(self.u, repeat(self.v_cut)))
 
         Γ_visible = Γ.exterior.difference(Σ)
 
-        i = self.v >= v_cut
-        AC = np.empty((np.sum(i), 2), dtype=np.float64)
-        AC[:, 0] = u_cut
-        AC[:, 1] = self.v[i]
-        AC = shapely.geometry.LineString(AC)
+        i = self.v >= self.v_cut
+        AC = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v[i]))
 
-        i = self.u <= u_cut
-        CD = np.empty((np.sum(i), 2), dtype=np.float64)
-        CD[:, 0] = self.u[i][::-1]
-        CD[:, 1] = v_max
-        CD = shapely.geometry.LineString(CD)
+        i = self.u <= self.u_cut
+        CD = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(v_max)))
 
         i = self.v <= v_cut
-        FG = np.empty((np.sum(i), 2), dtype=np.float64)
-        FG[:, 0] = u_max
-        FG[:, 1] = self.v[i]
-        FG = shapely.geometry.LineString(FG)
+        FG = shapely.geometry.LineString(zip(repeat(u_max), self.v[i]))
 
         i = self.u >= u_cut
-        GA = np.empty((np.sum(i), 2), dtype=np.float64)
-        GA[:, 0] = self.u[i][::-1]
-        GA[:, 1] = v_cut
-        GA = shapely.geometry.LineString(GA)
+        GA = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(self.v_cut)))
 
         GH = GA.difference(Γ)
         BC = AC.difference(Γ)
