@@ -39,8 +39,8 @@ class ShellWithSubSystem:
 
         self.Γ = shapely.geometry.Polygon(self.border(t))
 
-        u_min, u_max = np.min(self.u), np.max(self.u)
-        v_min, v_max = np.min(self.v), np.max(self.v)
+        self.u_min, self.u_max = np.min(self.u), np.max(self.u)
+        self.v_min, self.v_max = np.min(self.v), np.max(self.v)
         u_le = u <= u_cut
         u_ge = u >= u_cut
         v_le = v <= v_cut
@@ -48,10 +48,10 @@ class ShellWithSubSystem:
         self.Σ = shapely.geometry.Polygon(
             chain(
                 zip(repeat(u_cut), v[v_ge]),
-                zip(u[u_le][::-1], repeat(v_max)),
-                zip(repeat(u_min), v[::-1]),
-                zip(u, repeat(v_min)),
-                zip(repeat(u_max), v[v_le]),
+                zip(u[u_le][::-1], repeat(self.v_max)),
+                zip(repeat(self.u_min), v[::-1]),
+                zip(u, repeat(self.v_min)),
+                zip(repeat(self.u_max), v[v_le]),
                 zip(u[u_ge][::-1], repeat(v_cut)),
             )
         )
@@ -68,10 +68,6 @@ class ShellWithSubSystem:
     def draw_bare(self, ctx, params):
         palette = params["color"]["category20c"]
 
-
-        u_min, u_max = np.min(self.u), np.max(self.u)
-        v_min, v_max = np.min(self.v), np.max(self.v)
-
         iso_u = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v))
         iso_v = shapely.geometry.LineString(zip(self.u, repeat(self.v_cut)))
 
@@ -81,10 +77,10 @@ class ShellWithSubSystem:
         AC = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v[i]))
 
         i = self.u <= self.u_cut
-        CD = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(v_max)))
+        CD = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(self.v_max)))
 
         i = self.v <= self.v_cut
-        FG = shapely.geometry.LineString(zip(repeat(u_max), self.v[i]))
+        FG = shapely.geometry.LineString(zip(repeat(self.u_max), self.v[i]))
 
         i = self.u >= self.u_cut
         GA = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(self.v_cut)))
@@ -160,10 +156,10 @@ class ShellWithSubSystem:
         ctx.set_line_width(params["line width"]["normal"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
         for uv_i in [
-            (u_max, v_min),
-            (u_max, self.v_cut),
-            (self.u_cut, v_max),
-            (u_min, v_max),
+            (self.u_max, self.v_min),
+            (self.u_max, self.v_cut),
+            (self.u_cut, self.v_max),
+            (self.u_min, self.v_max),
         ]:
             ctx.move_to(*project(self.shell.f_inf(uv_i)))
             ctx.line_to(*project(self.shell.f_sup(uv_i)))
@@ -197,7 +193,7 @@ class ShellWithSubSystem:
         labels = []
         dx, dy = 5.0, 5.0
 
-        x1, y1 = self.pf_sup((u_min + dx, v_min + dy))
+        x1, y1 = self.pf_sup((self.u_min + dx, self.v_min + dy))
         x2, y2 = x1 - dx, y1 + dy
         ctx.move_to(x1, y1)
         ctx.line_to(x2, y2)
