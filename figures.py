@@ -10,7 +10,7 @@ import numpy as np
 
 import labelling
 
-from pycairo_utils import draw_line, draw_polyline
+from pycairo_utils import draw_line, draw_polyline, init_context
 from geometry import *
 from labelling import Label
 
@@ -223,15 +223,8 @@ class ShellWithSubSystem:
         return labels
 
     def draw(self, width, height, basename, params):
-        with cairo.PDFSurface(
-            basename + "-bare.pdf", width * MM, height * MM
-        ) as surface:
-            ctx = cairo.Context(surface)
-
-            ctx.scale(MM, MM)  # Default unit is mm
-            ctx.translate(0.5 * width, 0.5 * height)  # Place origin at center
-            ctx.scale(1.0, -1.0)  # y points upwards
-
+        with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
+            ctx = init_context(surface, width, height)
             labels = []
             self.draw_bare(ctx, labels, params)
 
