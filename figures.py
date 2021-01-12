@@ -62,8 +62,8 @@ class ShellWithSubSystem:
         def pf_mid(uv):
             return project(self.shell.f_mid(uv))
 
-        u_min, u_max, u_cut = np.min(self.u), np.max(self.u), self.u_cut
-        v_min, v_max, v_cut = np.min(self.v), np.max(self.v), self.v_cut
+        u_min, u_max = np.min(self.u), np.max(self.u), self.u_cut
+        v_min, v_max = np.min(self.v), np.max(self.v), self.v_cut
 
         Γ = shapely.geometry.Polygon(self.uv_Γ)
         Σ = shapely.geometry.Polygon(self.uv_Σ)
@@ -79,10 +79,10 @@ class ShellWithSubSystem:
         i = self.u <= self.u_cut
         CD = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(v_max)))
 
-        i = self.v <= v_cut
+        i = self.v <= self.v_cut
         FG = shapely.geometry.LineString(zip(repeat(u_max), self.v[i]))
 
-        i = self.u >= u_cut
+        i = self.u >= self.u_cut
         GA = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(self.v_cut)))
 
         GH = GA.difference(Γ)
@@ -130,7 +130,7 @@ class ShellWithSubSystem:
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
-        for iso, index, bound in [(iso_u, 1, v_cut), (iso_v, 0, u_cut)]:
+        for iso, index, bound in [(iso_u, 1, self.v_cut), (iso_v, 0, self.u_cut)]:
             mls = iso.difference(Γ)
             for ls in mls:
                 if ls.coords[0][index] <= bound:
@@ -159,7 +159,7 @@ class ShellWithSubSystem:
         ## Fibers of outer system
         ctx.set_line_width(params["line width"]["normal"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
-        for uv_i in [(u_max, v_min), (u_max, v_cut), (u_cut, v_max), (u_min, v_max)]:
+        for uv_i in [(u_max, v_min), (u_max, self.v_cut), (self.u_cut, v_max), (u_min, v_max)]:
             ctx.move_to(*project(self.shell.f_inf(uv_i)))
             ctx.line_to(*project(self.shell.f_sup(uv_i)))
         ctx.stroke()
