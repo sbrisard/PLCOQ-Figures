@@ -1,6 +1,6 @@
 import json
 
-from itertools import repeat
+from itertools import chain, repeat
 
 import PyPDF2
 import cairo
@@ -62,8 +62,8 @@ class ShellWithSubSystem:
         def pf_mid(uv):
             return project(self.shell.f_mid(uv))
 
-        u_min, u_max = np.min(self.u), np.max(self.u), self.u_cut
-        v_min, v_max = np.min(self.v), np.max(self.v), self.v_cut
+        u_min, u_max = np.min(self.u), np.max(self.u)
+        v_min, v_max = np.min(self.v), np.max(self.v)
 
         Γ = shapely.geometry.Polygon(self.uv_Γ)
         Σ = shapely.geometry.Polygon(self.uv_Σ)
@@ -104,8 +104,7 @@ class ShellWithSubSystem:
 
         ## Lateral face of outer system
         def draw_lateral(uv):
-            draw_polyline(ctx, pf_inf(uv))
-            draw_polyline(ctx, pf_sup(uv[::-1]), move_to_first=False)
+            draw_polyline(ctx, chain(pf_inf(uv), pf_sup(uv[::-1])))
             ctx.close_path()
 
         ctx.set_source_rgb(*palette[-2])
@@ -119,8 +118,7 @@ class ShellWithSubSystem:
 
         ## Lateral face of sub-system
         ctx.set_source_rgb(*palette[1])
-        draw_polyline(ctx, pf_inf(Γ_visible))
-        draw_polyline(ctx, pf_sup(Γ_visible)[::-1], move_to_first=False)
+        draw_polyline(ctx, chain(pf_inf(Γ_visible), pf_sup(Γ_visible)[::-1]))
         ctx.close_path()
         ctx.fill()
 
@@ -140,26 +138,28 @@ class ShellWithSubSystem:
         ## Upper and lower faces of outer system
         ctx.set_line_width(params["line width"]["normal"])
         draw_polyline(ctx, pf_sup(Σ.exterior.difference(Γ)))
-        draw_polyline(ctx, pf_inf(FG))
-        draw_polyline(ctx, pf_inf(GH), move_to_first=False)
-        draw_polyline(ctx, pf_inf(BC))
-        draw_polyline(ctx, pf_inf(CD), move_to_first=False)
+        draw_polyline(ctx, chain(pf_inf(FG), pf_inf(GH)))
+        draw_polyline(ctx, chain(pf_inf(BC), pf_inf(CD)))
         ctx.stroke()
 
         ## Mid surface
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(*palette[4])
-        draw_polyline(ctx, pf_mid(FG))
-        draw_polyline(ctx, pf_mid(GH), move_to_first=False)
-        draw_polyline(ctx, pf_mid(Γ.exterior.difference(Σ)), move_to_first=False)
-        draw_polyline(ctx, pf_mid(BC))
-        draw_polyline(ctx, pf_mid(CD), move_to_first=False)
+        draw_polyline(
+            ctx, chain(pf_mid(FG), pf_mid(GH), pf_mid(Γ.exterior.difference(Σ)))
+        )
+        draw_polyline(ctx, chain(pf_mid(BC), pf_mid(CD)))
         ctx.stroke()
 
         ## Fibers of outer system
         ctx.set_line_width(params["line width"]["normal"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
-        for uv_i in [(u_max, v_min), (u_max, self.v_cut), (self.u_cut, v_max), (u_min, v_max)]:
+        for uv_i in [
+            (u_max, v_min),
+            (u_max, self.v_cut),
+            (self.u_cut, v_max),
+            (u_min, v_max),
+        ]:
             ctx.move_to(*project(self.shell.f_inf(uv_i)))
             ctx.line_to(*project(self.shell.f_sup(uv_i)))
         ctx.stroke()
