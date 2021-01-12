@@ -271,9 +271,13 @@ def fig20210105175723(params, basename):
     drawing.draw(width, height, basename, params)
 
 
-if __name__ == "__main__":
+def main():
     with open("cairo_params.json", "r") as f:
         params = json.load(f)
 
     params["color"] = {k: parse_palette(v) for k, v in params["color"].items()}
     fig20210105175723(params, "fig20210105175723")
+
+
+if __name__ == "__main__":
+    main()
