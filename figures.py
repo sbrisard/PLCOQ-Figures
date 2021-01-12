@@ -10,7 +10,7 @@ import numpy as np
 
 import labelling
 
-from pycairo_utils import draw_polyline
+from pycairo_utils import draw_line, draw_polyline
 from geometry import *
 from labelling import Label
 
@@ -163,8 +163,9 @@ class ShellWithSubSystem:
             (self.u_cut, self.v_max),
             (self.u_min, self.v_max),
         ]:
-            ctx.move_to(*project(self.shell.f_inf(uv_i)))
-            ctx.line_to(*project(self.shell.f_sup(uv_i)))
+            draw_line(
+                ctx, *project(self.shell.f_inf(uv_i)), *project(self.shell.f_sup(uv_i))
+            )
         ctx.stroke()
 
         # Sub-system
@@ -182,8 +183,7 @@ class ShellWithSubSystem:
             ctx.line_to(*self.pf_inf(ls.coords[-1]))
 
         for uv in (self.Γ_visible.coords[0], self.Γ_visible.coords[-1]):
-            ctx.move_to(*self.pf_inf(uv))
-            ctx.line_to(*self.pf_sup(uv))
+            draw_line(ctx, *self.pf_inf(uv), *self.pf_sup(uv))
         ctx.stroke()
 
     def gen_labels(self, ctx):
@@ -196,34 +196,29 @@ class ShellWithSubSystem:
 
         x1, y1 = self.pf_sup((self.u_min + dx, self.v_min + dy))
         x2, y2 = x1 - dx, y1 + dy
-        ctx.move_to(x1, y1)
-        ctx.line_to(x2, y2)
+        draw_line(ctx, x1, y1, x2, y2)
         labels.append(Label(r"\(\Omega\)", u2d(x2, y2), (1.0, 0.0), False))
 
         x1, y1 = self.pf_mid((self.u_max, 0.5 * self.v_min))
         x2, y2 = x1 - dx, y1 - dx
-        ctx.move_to(x1, y1)
-        ctx.line_to(x2, y2)
+        draw_line(ctx, x1, y1, x2, y2)
         labels.append(Label(r"\(\Sigma\)", u2d(x2, y2), (1.0, 1.0), False))
 
         x1, y1 = self.pf_mid(self.Γ_visible.interpolate(0.5, normalized=True))
         x2, y2 = x1 + dx, y1 - dy
-        ctx.move_to(x1, y1)
-        ctx.line_to(x2, y2)
+        draw_line(ctx, x1, y1, x2, y2)
         labels.append(Label(r"\(\Gamma\)", u2d(x2, y2), (0.0, 1.0), False))
 
         uv = self.Γ_visible.interpolate(0.25, normalized=True)
         x1, y1 = 0.5 * (self.pf_mid(uv) + self.pf_inf(uv))
         x2, y2 = x1 - dx, y1 - dy
-        ctx.move_to(x1, y1)
-        ctx.line_to(x2, y2)
+        draw_line(ctx, x1, y1, x2, y2)
         labels.append(Label(r"\(\Lambda(\Gamma)\)", u2d(x2, y2), (1.0, 1.0), False))
 
         uv = self.Γ.exterior.interpolate(0.33, normalized=True)
         x1, y1 = 0.75 * self.pf_sup(uv)
         x2, y2 = x1 + dx, y1
-        ctx.move_to(x1, y1)
-        ctx.line_to(x2, y2)
+        draw_line(ctx, x1, y1, x2, y2)
         labels.append(Label(r"\(\Omega(\Gamma)\)", u2d(x2, y2), (0.0, 0.5), False))
 
         ctx.stroke()
