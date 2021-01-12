@@ -37,7 +37,7 @@ class ShellWithSubSystem:
         self.u_cut = u_cut
         self.v_cut = v_cut
 
-        self.uv_Γ = self.border(t)
+        self.Γ = shapely.geometry.Polygon(self.border(t))
 
         u_min, u_max = np.min(self.u), np.max(self.u)
         v_min, v_max = np.min(self.v), np.max(self.v)
@@ -65,13 +65,12 @@ class ShellWithSubSystem:
         u_min, u_max = np.min(self.u), np.max(self.u)
         v_min, v_max = np.min(self.v), np.max(self.v)
 
-        Γ = shapely.geometry.Polygon(self.uv_Γ)
         Σ = shapely.geometry.Polygon(self.uv_Σ)
 
         iso_u = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v))
         iso_v = shapely.geometry.LineString(zip(self.u, repeat(self.v_cut)))
 
-        Γ_visible = Γ.exterior.difference(Σ)
+        Γ_visible = self.Γ.exterior.difference(Σ)
 
         i = self.v >= self.v_cut
         AC = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v[i]))
@@ -85,20 +84,20 @@ class ShellWithSubSystem:
         i = self.u >= self.u_cut
         GA = shapely.geometry.LineString(zip(self.u[i][::-1], repeat(self.v_cut)))
 
-        GH = GA.difference(Γ)
-        BC = AC.difference(Γ)
+        GH = GA.difference(self.Γ)
+        BC = AC.difference(self.Γ)
 
         # Filled areas
 
         ## Upper face of outer system
         ctx.set_source_rgb(*palette[-1])
-        draw_polyline(ctx, pf_sup(Σ.difference(Γ).exterior))
+        draw_polyline(ctx, pf_sup(Σ.difference(self.Γ).exterior))
         ctx.close_path()
         ctx.fill()
 
         ## Upper face of sub-system
         ctx.set_source_rgb(*palette[3])
-        draw_polyline(ctx, pf_sup(Γ.exterior))
+        draw_polyline(ctx, pf_sup(self.Γ.exterior))
         ctx.close_path()
         ctx.fill()
 
@@ -129,7 +128,7 @@ class ShellWithSubSystem:
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
         for iso, index, bound in [(iso_u, 1, self.v_cut), (iso_v, 0, self.u_cut)]:
-            mls = iso.difference(Γ)
+            mls = iso.difference(self.Γ)
             for ls in mls:
                 if ls.coords[0][index] <= bound:
                     draw_polyline(ctx, pf_sup(ls))
@@ -137,7 +136,7 @@ class ShellWithSubSystem:
 
         ## Upper and lower faces of outer system
         ctx.set_line_width(params["line width"]["normal"])
-        draw_polyline(ctx, pf_sup(Σ.exterior.difference(Γ)))
+        draw_polyline(ctx, pf_sup(Σ.exterior.difference(self.Γ)))
         draw_polyline(ctx, chain(pf_inf(FG), pf_inf(GH)))
         draw_polyline(ctx, chain(pf_inf(BC), pf_inf(CD)))
         ctx.stroke()
@@ -146,7 +145,7 @@ class ShellWithSubSystem:
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(*palette[4])
         draw_polyline(
-            ctx, chain(pf_mid(FG), pf_mid(GH), pf_mid(Γ.exterior.difference(Σ)))
+            ctx, chain(pf_mid(FG), pf_mid(GH), pf_mid(self.Γ.exterior.difference(Σ)))
         )
         draw_polyline(ctx, chain(pf_mid(BC), pf_mid(CD)))
         ctx.stroke()
@@ -166,7 +165,7 @@ class ShellWithSubSystem:
 
         ## Sub-system
         ctx.set_source_rgb(*palette[0])
-        draw_polyline(ctx, pf_sup(Γ.exterior))
+        draw_polyline(ctx, pf_sup(self.Γ.exterior))
         draw_polyline(ctx, pf_inf(Γ_visible))
         ctx.stroke()
 
@@ -174,7 +173,7 @@ class ShellWithSubSystem:
         ctx.set_line_width(params["line width"]["thin"])
 
         for iso in (iso_u, iso_v):
-            ls = iso.intersection(Γ)
+            ls = iso.intersection(self.Γ)
             draw_polyline(ctx, pf_sup(ls))
             ctx.line_to(*pf_inf(ls.coords[-1]))
 
