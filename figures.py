@@ -41,13 +41,19 @@ class ShellWithSubSystem:
 
         u_min, u_max = np.min(self.u), np.max(self.u)
         v_min, v_max = np.min(self.v), np.max(self.v)
-        self.uv_Σ = (
-            [(u_cut, v_i) for v_i in v if v_i >= v_cut]
-            + [(u_i, v_max) for u_i in u[::-1] if u_i <= u_cut]
-            + [(u_min, v_i) for v_i in v[::-1]]
-            + [(u_i, v_min) for u_i in u]
-            + [(u_max, v_i) for v_i in v if v_i <= v_cut]
-            + [(u_i, v_cut) for u_i in u[::-1] if u_i >= u_cut]
+        u_le = u <= u_cut
+        u_ge = u >= u_cut
+        v_le = v <= v_cut
+        v_ge = v >= v_cut
+        self.Σ = shapely.geometry.Polygon(
+            chain(
+                zip(repeat(u_cut), v[v_ge]),
+                zip(u[u_le][::-1], repeat(v_max)),
+                zip(repeat(u_min), v[::-1]),
+                zip(u, repeat(v_min)),
+                zip(repeat(u_max), v[v_le]),
+                zip(u[u_ge][::-1], repeat(v_cut)),
+            )
         )
 
     def draw(self, ctx, params):
@@ -65,12 +71,10 @@ class ShellWithSubSystem:
         u_min, u_max = np.min(self.u), np.max(self.u)
         v_min, v_max = np.min(self.v), np.max(self.v)
 
-        Σ = shapely.geometry.Polygon(self.uv_Σ)
-
         iso_u = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v))
         iso_v = shapely.geometry.LineString(zip(self.u, repeat(self.v_cut)))
 
-        Γ_visible = self.Γ.exterior.difference(Σ)
+        Γ_visible = self.Γ.exterior.difference(self.Σ)
 
         i = self.v >= self.v_cut
         AC = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v[i]))
@@ -91,7 +95,7 @@ class ShellWithSubSystem:
 
         ## Upper face of outer system
         ctx.set_source_rgb(*palette[-1])
-        draw_polyline(ctx, pf_sup(Σ.difference(self.Γ).exterior))
+        draw_polyline(ctx, pf_sup(self.Σ.difference(self.Γ).exterior))
         ctx.close_path()
         ctx.fill()
 
@@ -136,7 +140,7 @@ class ShellWithSubSystem:
 
         ## Upper and lower faces of outer system
         ctx.set_line_width(params["line width"]["normal"])
-        draw_polyline(ctx, pf_sup(Σ.exterior.difference(self.Γ)))
+        draw_polyline(ctx, pf_sup(self.Σ.exterior.difference(self.Γ)))
         draw_polyline(ctx, chain(pf_inf(FG), pf_inf(GH)))
         draw_polyline(ctx, chain(pf_inf(BC), pf_inf(CD)))
         ctx.stroke()
@@ -145,7 +149,8 @@ class ShellWithSubSystem:
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(*palette[4])
         draw_polyline(
-            ctx, chain(pf_mid(FG), pf_mid(GH), pf_mid(self.Γ.exterior.difference(Σ)))
+            ctx,
+            chain(pf_mid(FG), pf_mid(GH), pf_mid(self.Γ.exterior.difference(self.Σ))),
         )
         draw_polyline(ctx, chain(pf_mid(BC), pf_mid(CD)))
         ctx.stroke()
