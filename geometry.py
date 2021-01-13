@@ -58,7 +58,6 @@ def surface_normal(f, h=1e-4):
 def shift_surface(f, d, n=None):
     if n is None:
         n = surface_normal(f)
-
     return lambda uv: f(uv) + d(uv)[..., None] * n(uv)
 
 
