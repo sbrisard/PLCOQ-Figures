@@ -237,22 +237,34 @@ class ShellWithSubSystem:
             writer.write(f)
 
 
-def fig20210105175723(params, basename):
-    width, height = 80.0, 60.0
-
-    f_mid = Plane()
-    # f_mid = HyperbolicParaboloid(11.0, 8.0)
+def default_shell(plate=True, constant_thickness=True):
+    f_mid = Plane() if plate else HyperbolicParaboloid(11.0, 8.0)
     n_mid = surface_normal(f_mid)
 
-    def d_inf(uv):
-        uv = np.asarray(uv)
-        return -3.0 + np.sin(0.3 * (uv[..., 0] + uv[..., 1]))
+    if constant_thickness:
+        d_inf = lambda uv: np.full_like(np.asarray(uv)[..., 0], -3.0)
+        d_sup = lambda uv: np.full_like(np.asarray(uv)[..., 0], 3.0)
+    else:
+        def d_inf(uv):
+            uv = np.asarray(uv)
+            return -3.0 + np.sin(0.3 * (uv[..., 0] + uv[..., 1]))
 
-    def d_sup(uv):
-        uv = np.asarray(uv)
-        return 3.0 + np.cos(0.3 * (uv[..., 0] - uv[..., 1]))
+        def d_sup(uv):
+            uv = np.asarray(uv)
+            return 3.0 + np.cos(0.3 * (uv[..., 0] - uv[..., 1]))
 
-    shell = Shell(f_mid, n_mid, d_inf, d_sup)
+    return Shell(f_mid, n_mid, d_inf, d_sup)
+
+
+def fig20210113144259(params):
+    basename = "fig20210113144259"
+    width, height = 80.0, 60.0
+    return
+
+
+def fig20210105175723(params, basename):
+    width, height = 80.0, 60.0
+    shell = default_shell(plate=True, constant_thickness=True)
 
     border = Ellipse(7.0, 10.0)
 
