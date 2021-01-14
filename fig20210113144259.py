@@ -26,7 +26,7 @@ def main(params):
     palette = params["color"]["category20c"]
 
     with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
-        ctx = init_context(surface, width, height)
+        ctx = init_context(surface)
         ctx.set_line_width(params["line width"]["normal"])
 
         ctx.set_source_rgb(*palette[-1])

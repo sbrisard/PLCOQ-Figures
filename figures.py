@@ -257,11 +257,12 @@ class ShellWithSubSystem:
         labels.append(Label(r"\(\Omega(\Gamma)\)", u2d(x2, y2), (0.0, 0.5), False))
 
         ctx.stroke()
+
         return labels
 
-    def draw(self, width, height, basename, params):
+    def draw(self, basename, params):
         with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
-            ctx = init_context(surface, width, height)
+            ctx = init_context(surface)
             labels = []
             self.draw_bare(ctx, labels, params)
 
@@ -269,7 +270,6 @@ class ShellWithSubSystem:
 
 
 def fig20210105175723(params, basename):
-    width, height = 80.0, 60.0
     shell = default_shell(plate=True, constant_thickness=False)
 
     border = Ellipse(7.0, 10.0)
@@ -286,7 +286,7 @@ def fig20210105175723(params, basename):
         u_cut,
         v_cut,
     )
-    drawing.draw(width, height, basename, params)
+    drawing.draw(basename, params)
 
 
 def main():

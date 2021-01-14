@@ -21,7 +21,7 @@ def draw_polyline(ctx, xy, move_to_first=True, close_path=False):
         ctx.line_to(x, y)
 
 
-def init_context(surface, width, height):
+def init_context(surface, width=80, height=60):
     surface.set_size(width * MM, height * MM)
     ctx = cairo.Context(surface)
 
