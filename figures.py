@@ -293,15 +293,17 @@ def fig20210113144259(params):
     u = np.linspace(-15.0, 15.0, num=51)
     v = np.linspace(-20.0, 20.0, num=51)
 
-    pf_sup = lambda u, v: project(shell.f_sup((u, v)))
-    pf_inf = lambda u, v: project(shell.f_inf((u, v)))
-    pf_mid = lambda u, v: project(shell.f_mid((u, v)))
+    u_cut = 0.0
+
+    pf_sup = lambda u, v: project(*shell.f_sup(u, v))
+    pf_inf = lambda u, v: project(*shell.f_inf(u, v))
+    pf_mid = lambda u, v: project(*shell.f_mid(u, v))
+
+    palette = params["color"]["category20c"]
 
     with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
         ctx = init_context(surface, width, height)
         ctx.set_line_width(params["line width"]["normal"])
-
-        palette = params["color"]["category20c"]
 
         ctx.set_source_rgb(*palette[-1])
         ctx.move_to(*pf_sup(u[0], v[0]))
@@ -351,20 +353,43 @@ def fig20210113144259(params):
             ctx.line_to(*pf_mid(u_, v[-1]))
         ctx.stroke()
 
-        iso_u = (pf_sup(0.0, v_) for v_ in v)
-        ctx.set_line_width(params["line width"]["thin"])
-        ctx.move_to(*next(iso_u))
-        for x, y in iso_u:
-            ctx.line_to(x, y)
+        ctx.set_source_rgba(*palette[8], 0.5)
+        FG = shapely.geometry.LineString(pf_sup(u_cut, v_) for v_ in v)
 
         x = 0.0
         y1, z1 = v[0] - 10.0, -10.0
         y2, z2 = v[-1] + 10.0, 10.0
-        ctx.move_to(*project((x, y1, z1)))
-        ctx.line_to(*project((x, y1, z2)))
-        ctx.line_to(*project((x, y2, z2)))
-        ctx.line_to(*project((x, y2, z1)))
+        ls1 = shapely.geometry.LineString((project(x, y1, z1), project(x, y2, z1)))
+        ls2 = shapely.geometry.LineString(pf_inf(u_, v[-1]) for u_ in u)
+        A = ls1.intersection(ls2)
+        B = shapely.geometry.Point(*project(x, y2, z1))
+        C = shapely.geometry.Point(*project(x, y2, z2))
+        D = shapely.geometry.Point(*project(x, y1, z2))
+        H = shapely.geometry.Point(*pf_inf(u_cut, v[-1]))
+
+        ls1 = shapely.geometry.LineString(pf_sup(u_, v[0]) for u_ in u[::-1])
+        ls2 = shapely.geometry.LineString((project(x, y1, z1), project(x, y1, z2)))
+        E = ls1.intersection(ls2)
+        F = ls1.intersection(FG)
+
+        rect = shapely.geometry.Polygon([E, (F.x, E.y), F, (E.x, F.y)])
+        EF = rect.intersection(ls1)
+
+        rect = shapely.geometry.Polygon([A, (H.x, A.y), H, (A.x, H.y)])
+        HA = rect.intersection(shapely.geometry.LineString(pf_inf(u_, v[-1]) for u_ in u))
+
+        ctx.move_to(A.x, A.y)
+        ctx.line_to(B.x, B.y)
+        ctx.line_to(C.x, C.y)
+        ctx.line_to(D.x, D.y)
+        draw_polyline(ctx, chain(EF.coords, FG.coords, HA.coords), move_to_first=False)
         ctx.close_path()
+        cutting_plane = ctx.copy_path()
+        ctx.fill()
+
+        ctx.set_line_width(params["line width"]["thin"])
+        ctx.set_source_rgb(*palette[8])
+        ctx.append_path(cutting_plane)
         ctx.stroke()
 
 
@@ -396,7 +421,7 @@ def main():
     params["color"] = {k: parse_palette(v) for k, v in params["color"].items()}
     fig20210105175723(params, "fig20210105175723")
 
-    # fig20210113144259(params)
+    fig20210113144259(params)
 
 
 if __name__ == "__main__":
