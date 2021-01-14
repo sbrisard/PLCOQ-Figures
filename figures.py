@@ -265,18 +265,8 @@ class ShellWithSubSystem:
         insert_labels(basename, labels)
 
 
-def default_shell(plate=True, constant_thickness=True):
-    f_mid = Plane() if plate else HyperbolicParaboloid(11.0, 8.0)
-    n_mid = surface_normal(f_mid)
 
-    if constant_thickness:
-        d_inf = lambda u, v: -3.0
-        d_sup = lambda u, v: 3.0
-    else:
-        d_inf = lambda u, v: -3.0 + np.sin(0.3 * (u + v))
-        d_sup = lambda u, v: 3.0 + np.cos(0.3 * (u - v))
 
-    return Shell(f_mid, n_mid, d_inf, d_sup)
 
 
 def fig20210113144259(params):
