@@ -109,3 +109,12 @@ def label_json_formatter(o):
         }
     else:
         raise TypeError()
+
+def insert_labels(basename, labels):
+    page = PyPDF2.PdfFileReader(basename + "-bare.pdf").getPage(0)
+    for label in labels:
+        label.insert(page)
+    writer = PyPDF2.PdfFileWriter()
+    writer.addPage(page)
+    with open(basename + ".pdf", "wb") as f:
+        writer.write(f)

@@ -12,7 +12,7 @@ import labelling
 
 from pycairo_utils import draw_line, draw_polyline, init_context
 from geometry import *
-from labelling import Label
+from labelling import Label, insert_labels
 
 MM = 72.0 / 25.4
 
@@ -262,14 +262,7 @@ class ShellWithSubSystem:
             labels = []
             self.draw_bare(ctx, labels, params)
 
-        page = PyPDF2.PdfFileReader(basename + "-bare.pdf").getPage(0)
-        for label in labels:
-            label.insert(page)
-        writer = PyPDF2.PdfFileWriter()
-        writer.addPage(page)
-        with open(basename + ".pdf", "wb") as f:
-            writer.write(f)
-
+        insert_labels(basename, labels)
 
 def default_shell(plate=True, constant_thickness=True):
     f_mid = Plane() if plate else HyperbolicParaboloid(11.0, 8.0)
