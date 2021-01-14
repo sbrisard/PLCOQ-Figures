@@ -6,12 +6,11 @@ import shapely
 
 from geometry import default_shell, project
 from labelling import Label, insert_labels
-from pycairo_utils import draw_polyline, init_context
+from pycairo_utils import draw_arrow, draw_polyline, init_context
 
 
 def main(params):
     basename = "fig20210113144259"
-    width, height = 80.0, 60.0
     shell = default_shell(plate=True, constant_thickness=False)
 
     u = np.linspace(-15.0, 15.0, num=51)
