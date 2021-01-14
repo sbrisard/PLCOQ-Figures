@@ -264,6 +264,7 @@ class ShellWithSubSystem:
 
         insert_labels(basename, labels)
 
+
 def default_shell(plate=True, constant_thickness=True):
     f_mid = Plane() if plate else HyperbolicParaboloid(11.0, 8.0)
     n_mid = surface_normal(f_mid)
@@ -369,7 +370,9 @@ def fig20210113144259(params):
         EF = rect.intersection(ls1)
 
         rect = shapely.geometry.Polygon([A, (H.x, A.y), H, (A.x, H.y)])
-        HA = rect.intersection(shapely.geometry.LineString(pf_inf(u_, v[-1]) for u_ in u))
+        HA = rect.intersection(
+            shapely.geometry.LineString(pf_inf(u_, v[-1]) for u_ in u)
+        )
 
         ctx.move_to(A.x, A.y)
         ctx.line_to(B.x, B.y)
@@ -384,6 +387,83 @@ def fig20210113144259(params):
         ctx.set_source_rgb(*palette[8])
         ctx.append_path(cutting_plane)
         ctx.stroke()
+
+        ctx.set_source_rgb(0.0, 0.0, 0.0)
+        ctx.set_line_width(params["line width"]["thin"])
+        labels = []
+        labels.append(
+            Label(
+                r"\(\Omega\)",
+                ctx.user_to_device(*pf_sup(0.75 * u[-1], 0.75 * v[0])),
+                (0.5, 0.5),
+                y_upwards=False,
+            )
+        )
+
+        dx, dy = 5.0, 5.0
+
+        ls = shapely.geometry.LineString(pf_mid(u[-1], v_) for v_ in v)
+        p1 = ls.interpolate(0.5, normalized=True)
+        x2, y2 = p1.x - dx, p1.y - dy
+        ctx.move_to(p1.x, p1.y)
+        ctx.line_to(x2, y2)
+        ctx.stroke()
+        labels.append(
+            Label(
+                r"\(\Sigma\)", ctx.user_to_device(x2, y2), (1.0, 1.0), y_upwards=False
+            )
+        )
+
+        ls = shapely.geometry.LineString(pf_inf(u[-1], v_) for v_ in v)
+        p1 = ls.interpolate(0.75, normalized=True)
+        x2, y2 = p1.x - dx, p1.y - dy
+        ctx.move_to(p1.x, p1.y)
+        ctx.line_to(x2, y2)
+        ctx.stroke()
+        labels.append(
+            Label(
+                r"\(\partial\Omega^-\)",
+                ctx.user_to_device(x2, y2),
+                (1.0, 1.0),
+                y_upwards=False,
+            )
+        )
+
+        u_ = u[-1]
+        v_ = 0.75 * v[0]
+        x1, y1 = pf_mid(u_, v_)
+        x2, y2 = pf_inf(u_, v_)
+        x1 = 0.5 * (x1 + x2)
+        y1 = 0.5 * (y1 + y2)
+        x2, y2 = x1 - dx, y1 - dy
+        ctx.move_to(x1, y1)
+        ctx.line_to(x2, y2)
+        ctx.stroke()
+        labels.append(
+            Label(
+                r"\(\Lambda\)",
+                ctx.user_to_device(x2, y2),
+                (1.0, 1.0),
+                y_upwards=False,
+            )
+        )
+
+        ls = shapely.geometry.LineString(pf_sup(u[0], v_) for v_ in v)
+        p1 = ls.interpolate(0.25, normalized=True)
+        x2, y2 = p1.x + dx, p1.y + dy
+        ctx.move_to(p1.x, p1.y)
+        ctx.line_to(x2, y2)
+        ctx.stroke()
+        labels.append(
+            Label(
+                r"\(\partial\Omega^+\)",
+                ctx.user_to_device(x2, y2),
+                (0.0, 0.0),
+                y_upwards=False,
+            )
+        )
+
+    insert_labels(basename, labels)
 
 
 def fig20210105175723(params, basename):
