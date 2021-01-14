@@ -13,7 +13,7 @@ def draw_line(ctx, x1, y1, x2, y2, stroke=True):
         ctx.stroke()
 
 
-def draw_polyline(ctx, xy, move_to_first=True):
+def draw_polyline(ctx, xy, move_to_first=True, close_path=False):
     it = iter(xy)
     if move_to_first:
         ctx.move_to(*next(it))
