@@ -199,7 +199,6 @@ def draw_right(u, v, basename):
     filename = stylesheet.full_path(basename + "-bare.pdf")
     with cairo.PDFSurface(filename, 1, 1) as surface:
         ctx = stylesheet.init_cairo_context(surface)
-        ctx.set_line_width(stylesheet.line_width("thick"))
         uv = [
             (u[-1], v[0]),
             (u[-1], v[-1]),
@@ -209,6 +208,8 @@ def draw_right(u, v, basename):
         xy = (project(u_, v_, 0.0) for u_, v_ in uv)
         draw_polyline(ctx, xy)
         ctx.close_path()
+
+        ctx.set_line_width(stylesheet.line_width("thick"))
         plate = ctx.copy_path()
         ctx.stroke()
 
