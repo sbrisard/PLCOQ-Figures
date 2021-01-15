@@ -11,10 +11,14 @@ def load(filename):
         __styles = json.load(f)
 
 
-def semantic_color(key, lightness="dark"):
-    key2 = __styles["color"][key]
-    r, g, b = __styles["color"][key2][lightness]
-    return r / 255, g / 255, b / 255
+def color(key, lightness="dark"):
+    value = __styles["color"][key]
+    if isinstance(value, str):
+        # Use recursive call in case of double aliases
+        return color(value, lightness)
+    else:
+        r, g, b = value[lightness]
+        return r / 255, g / 255, b / 255
 
 
 def line_width(key):
