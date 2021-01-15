@@ -28,7 +28,7 @@ def main():
         ctx = init_context(surface)
         ctx.set_line_width(stylesheet.line_width("normal"))
 
-        ctx.set_source_rgb(*stylesheet.color(-1))
+        ctx.set_source_rgb(*stylesheet.semantic_color("system", "light"))
         ctx.move_to(*pf_sup(u[0], v[0]))
         for u_ in u[1:]:
             ctx.line_to(*pf_sup(u_, v[0]))
@@ -42,7 +42,7 @@ def main():
         upper_surface = ctx.copy_path()
         ctx.fill()
 
-        ctx.set_source_rgb(*stylesheet.color(-2))
+        ctx.set_source_rgb(*stylesheet.semantic_color("system", "medium"))
         ctx.move_to(*pf_inf(u[-1], v[0]))
         for v_ in v[1:]:
             ctx.line_to(*pf_inf(u[-1], v_))
@@ -52,7 +52,7 @@ def main():
         lateral_surface_100 = ctx.copy_path()
         ctx.fill()
 
-        ctx.set_source_rgb(*stylesheet.color(-4))
+        ctx.set_source_rgb(*stylesheet.semantic_color("system", "dark"))
         ctx.move_to(*pf_inf(u[0], v[-1]))
         for u_ in u[1:]:
             ctx.line_to(*pf_inf(u_, v[-1]))
@@ -68,7 +68,7 @@ def main():
         ctx.append_path(lateral_surface_010)
         ctx.stroke()
 
-        ctx.set_source_rgb(*stylesheet.color(4))
+        ctx.set_source_rgb(*stylesheet.semantic_color("mid-surface"))
         ctx.move_to(*pf_mid(u[-1], v[0]))
         for v_ in v[1:]:
             ctx.line_to(*pf_mid(u[-1], v_))
@@ -76,7 +76,7 @@ def main():
             ctx.line_to(*pf_mid(u_, v[-1]))
         ctx.stroke()
 
-        ctx.set_source_rgba(*stylesheet.color(8), 0.5)
+        ctx.set_source_rgba(*stylesheet.semantic_color("cutting-plane"), 0.5)
         FG = shapely.geometry.LineString(pf_sup(u_cut, v_) for v_ in v)
 
         x = 0.0
@@ -113,7 +113,7 @@ def main():
         ctx.fill()
 
         ctx.set_line_width(stylesheet.line_width("thin"))
-        ctx.set_source_rgb(*stylesheet.color(8))
+        ctx.set_source_rgb(*stylesheet.semantic_color("cutting-plane"))
         ctx.append_path(cutting_plane)
         ctx.stroke()
 
@@ -191,9 +191,9 @@ def main():
                 y_upwards=False,
             )
         )
-        ctx.set_source_rgb(*stylesheet.color(4))
+        ctx.set_source_rgb(*stylesheet.semantic_color("unit-vector"))
         ctx.save()
-        ctx.translate(30., 17.)
+        ctx.translate(30.0, 17.0)
         draw_frame(ctx, labels)
         ctx.restore()
 

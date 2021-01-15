@@ -76,7 +76,7 @@ class ShellWithSubSystem:
         BC = AC.difference(self.Γ)
 
         # Upper face of outer system
-        ctx.set_source_rgb(*stylesheet.color(-1))
+        ctx.set_source_rgb(*stylesheet.semantic_color("system", "light"))
         draw_polyline(
             ctx,
             starmap(self.pf_sup, self.Σ.difference(self.Γ).exterior.coords),
@@ -85,7 +85,7 @@ class ShellWithSubSystem:
         ctx.fill()
 
         # Upper face of sub-system
-        ctx.set_source_rgb(*stylesheet.color(3))
+        ctx.set_source_rgb(*stylesheet.semantic_color("sub-system", "light"))
         draw_polyline(ctx, starmap(self.pf_sup, self.Γ.exterior.coords))
         ctx.close_path()
         ctx.fill()
@@ -98,18 +98,18 @@ class ShellWithSubSystem:
                 ctx.line_to(x, y)
             ctx.close_path()
 
-        ctx.set_source_rgb(*stylesheet.color(-2))
+        ctx.set_source_rgb(*stylesheet.semantic_color("system", "medium"))
         draw_lateral(FG.coords)
         draw_lateral(BC.coords)
         ctx.fill()
 
-        ctx.set_source_rgb(*stylesheet.color(-4))
+        ctx.set_source_rgb(*stylesheet.semantic_color("system", "dark"))
         draw_lateral(CD.coords)
         draw_lateral(GH.coords)
         ctx.fill()
 
         # Lateral face of sub-system
-        ctx.set_source_rgb(*stylesheet.color(1))
+        ctx.set_source_rgb(*stylesheet.semantic_color("sub-system", "medium"))
         points = chain(
             starmap(self.pf_inf, self.Γ_visible.coords),
             starmap(self.pf_sup, self.Γ_visible.coords[::-1]),
@@ -152,7 +152,7 @@ class ShellWithSubSystem:
 
         # Mid surface
         ctx.set_line_width(stylesheet.line_width("thin"))
-        ctx.set_source_rgb(*stylesheet.color(4))
+        ctx.set_source_rgb(*stylesheet.semantic_color("mid-surface"))
         points = starmap(
             self.pf_mid,
             chain(FG.coords, GH.coords, self.Γ.exterior.difference(self.Σ).coords),
@@ -180,7 +180,7 @@ class ShellWithSubSystem:
         ctx.stroke()
 
         # Sub-system
-        ctx.set_source_rgb(*stylesheet.color(0))
+        ctx.set_source_rgb(*stylesheet.semantic_color("sub-system"))
         draw_polyline(ctx, starmap(self.pf_sup, self.Γ.exterior.coords))
         draw_polyline(ctx, starmap(self.pf_inf, self.Γ_visible.coords))
         ctx.stroke()
