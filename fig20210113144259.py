@@ -8,7 +8,7 @@ import stylesheet
 
 from geometry import default_shell, project
 from labelling import Label, insert_labels
-from pycairo_utils import draw_arrow, draw_frame, draw_polyline, init_context
+from pycairo_utils import draw_frame, draw_polyline
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     pf_mid = lambda u, v: project(*shell.f_mid(u, v))
 
     with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
-        ctx = init_context(surface)
+        ctx = stylesheet.init_cairo_context(surface)
         ctx.set_line_width(stylesheet.line_width("normal"))
 
         ctx.set_source_rgb(*stylesheet.color("system", "light"))

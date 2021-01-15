@@ -6,7 +6,7 @@ import shapely.geometry
 
 import stylesheet
 
-from pycairo_utils import draw_polyline, init_context
+from pycairo_utils import draw_polyline
 from geometry import default_shell, Ellipse, project
 from labelling import insert_labels, Label
 
@@ -267,7 +267,7 @@ def main():
     )
 
     with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
-        ctx = init_context(surface)
+        ctx = stylesheet.init_cairo_context(surface)
         labels = []
         drawing.draw_bare(ctx, labels)
 

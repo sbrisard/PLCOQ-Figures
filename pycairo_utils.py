@@ -7,8 +7,6 @@ import cairo
 from geometry import project
 from labelling import Label
 
-MM = 72.0 / 25.4
-
 
 def draw_line(ctx, x1, y1, x2, y2, stroke=True):
     ctx.move_to(x1, y1)
@@ -23,18 +21,6 @@ def draw_polyline(ctx, xy, move_to_first=True, close_path=False):
         ctx.move_to(*next(it))
     for x, y in it:
         ctx.line_to(x, y)
-
-
-def init_context(surface, width=80, height=60):
-    surface.set_size(width * MM, height * MM)
-    ctx = cairo.Context(surface)
-
-    ctx.scale(MM, MM)  # Default unit is mm
-    ctx.translate(0.5 * width, 0.5 * height)  # Place origin at center
-    ctx.scale(1.0, -1.0)  # y points upwards
-    ctx.set_line_cap(cairo.LineCap.ROUND)
-    ctx.set_line_join(cairo.LineJoin.ROUND)
-    return ctx
 
 
 def draw_arrow_head(ctx):
