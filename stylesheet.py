@@ -2,7 +2,6 @@ import json
 
 import cairo
 
-MM = 72.0 / 25.4
 __styles = {}
 
 
@@ -28,11 +27,12 @@ def line_width(key):
 
 
 def init_cairo_context(surface):
+    unit = __styles["unit"]
     width, height = __styles["figure size"]
-    surface.set_size(width * MM, height * MM)
+    surface.set_size(width * unit, height * unit)
     ctx = cairo.Context(surface)
 
-    ctx.scale(MM, MM)  # Default unit is mm
+    ctx.scale(unit, unit)
     ctx.translate(0.5 * width, 0.5 * height)  # Place origin at center
     ctx.scale(1.0, -1.0)  # y points upwards
     ctx.set_line_cap(cairo.LineCap.ROUND)
