@@ -84,7 +84,6 @@ def draw_frame(ctx, labels=None):
             )
         )
         x, y = project(0.0, 0.5 * r, 0.0)
-        print(ctx.user_to_device(x, y))
         labels.append(
             Label(
                 color + r"\(\vec e_y\)",
