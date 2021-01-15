@@ -118,3 +118,8 @@ def draw_frame_2d(ctx, labels=None):
             )
         )
 
+
+def draw_mark(ctx, x, y):
+    lw = ctx.get_line_width()
+    ctx.arc(x, y, 1.5 * lw, 0.0, 2 * math.pi)
+    ctx.fill()
