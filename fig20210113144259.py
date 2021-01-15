@@ -208,14 +208,15 @@ def draw_right(u, v, basename):
         xy = (project(u_, v_, 0.0) for u_, v_ in uv)
         draw_polyline(ctx, xy)
         ctx.close_path()
-
-        ctx.set_line_width(stylesheet.line_width("thick"))
         plate = ctx.copy_path()
-        ctx.stroke()
 
         ctx.set_source_rgb(*stylesheet.color("system", "light"))
-        ctx.append_path(plate)
         ctx.fill()
+
+        ctx.set_source_rgb(0.0, 0.0, 0.0)
+        ctx.append_path(plate)
+        ctx.set_line_width(stylesheet.line_width("thick"))
+        ctx.stroke()
 
         ctx.set_line_width(stylesheet.line_width("thin"))
         ctx.set_source_rgb(*stylesheet.color("unit-vector"))
