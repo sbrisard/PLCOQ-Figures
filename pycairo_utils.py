@@ -31,6 +31,8 @@ def draw_arrow_head(ctx):
     ctx.line_to(-w, 0.5 * h)
     ctx.line_to(-0.75 * w, 0.0)
     ctx.line_to(-w, -0.5 * h)
+    ctx.close_path()
+    ctx.fill()
 
 
 def draw_arrow(ctx, x1, y1, x2, y2):
@@ -44,8 +46,6 @@ def draw_arrow(ctx, x1, y1, x2, y2):
     ctx.translate(x2, y2)
     ctx.rotate(angle)
     draw_arrow_head(ctx)
-    ctx.close_path()
-    ctx.fill()
 
     ctx.restore()
 
