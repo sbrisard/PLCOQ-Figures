@@ -1,3 +1,5 @@
+import os.path
+
 from itertools import chain
 
 import cairo
@@ -24,7 +26,8 @@ def main():
     pf_inf = lambda u, v: project(*shell.f_inf(u, v))
     pf_mid = lambda u, v: project(*shell.f_mid(u, v))
 
-    with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
+    filename = stylesheet.full_path(basename+"-bare.pdf")
+    with cairo.PDFSurface(filename, 1, 1) as surface:
         ctx = stylesheet.init_cairo_context(surface)
         ctx.set_line_width(stylesheet.line_width("normal"))
 

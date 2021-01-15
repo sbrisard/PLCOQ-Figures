@@ -1,3 +1,5 @@
+import os.path
+
 from itertools import chain, repeat, starmap
 
 import cairo
@@ -266,7 +268,8 @@ def main():
         v_cut,
     )
 
-    with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
+    filename = stylesheet.full_path(basename + "-bare.pdf")
+    with cairo.PDFSurface(filename, 1, 1) as surface:
         ctx = stylesheet.init_cairo_context(surface)
         labels = []
         drawing.draw_bare(ctx, labels)

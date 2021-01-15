@@ -1,4 +1,5 @@
 import json
+import os.path
 
 import cairo
 
@@ -38,6 +39,10 @@ def init_cairo_context(surface):
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
     return ctx
+
+
+def full_path(basename):
+    return os.path.join(__styles["output directory"], basename)
 
 
 # This is executed when the module is imported
