@@ -3,9 +3,6 @@ from itertools import chain
 import cairo
 import numpy as np
 
-from shapely.affinity import translate
-from shapely.geometry import LineString, Point
-
 import geometry
 import stylesheet
 
