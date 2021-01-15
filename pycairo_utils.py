@@ -87,3 +87,34 @@ def draw_frame(ctx, labels=None):
                 y_upwards=False,
             )
         )
+
+
+def draw_frame_2d(ctx, labels=None):
+    r = 10.0
+    lw = ctx.get_line_width()
+    draw_arrow(ctx, 0.0, 0.0, r, 0.0)
+    draw_arrow(ctx, 0.0, 0.0, 0.0, r)
+    if labels is not None:
+        color = "\\color[rgb]{{{:0.3f}, {:0.3f}, {:0.3f}}}".format(
+            *ctx.get_source().get_rgba()
+        )
+
+        x, y = r, 0.0
+        labels.append(
+            Label(
+                color + r"\(\vec e_x\)",
+                ctx.user_to_device(x, y - 3 * lw),
+                (0.5, 1.0),
+                y_upwards=False,
+            )
+        )
+        x, y = 0.0, r
+        labels.append(
+            Label(
+                color + r"\(\vec e_y\)",
+                ctx.user_to_device(x - 2 * lw, y),
+                (1.0, 0.5),
+                y_upwards=False,
+            )
+        )
+
