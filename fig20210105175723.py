@@ -4,6 +4,8 @@ import cairo
 import numpy as np
 import shapely.geometry
 
+import stylesheet
+
 from pycairo_utils import draw_polyline, init_context
 from geometry import default_shell, Ellipse, project
 from labelling import insert_labels, Label
@@ -54,9 +56,7 @@ class ShellWithSubSystem:
     def pf_mid(self, u, v):
         return project(*self.shell.f_mid(u, v))
 
-    def draw_bare(self, ctx, labels, params):
-        palette = params["color"]["category20c"]
-
+    def draw_bare(self, ctx, labels):
         iso_u = shapely.geometry.LineString(zip(repeat(self.u_cut), self.v))
         iso_v = shapely.geometry.LineString(zip(self.u, repeat(self.v_cut)))
 
@@ -76,7 +76,7 @@ class ShellWithSubSystem:
         BC = AC.difference(self.Γ)
 
         # Upper face of outer system
-        ctx.set_source_rgb(*palette[-1])
+        ctx.set_source_rgb(*stylesheet.color(-1))
         draw_polyline(
             ctx,
             starmap(self.pf_sup, self.Σ.difference(self.Γ).exterior.coords),
@@ -85,7 +85,7 @@ class ShellWithSubSystem:
         ctx.fill()
 
         # Upper face of sub-system
-        ctx.set_source_rgb(*palette[3])
+        ctx.set_source_rgb(*stylesheet.color(3))
         draw_polyline(ctx, starmap(self.pf_sup, self.Γ.exterior.coords))
         ctx.close_path()
         ctx.fill()
@@ -98,18 +98,18 @@ class ShellWithSubSystem:
                 ctx.line_to(x, y)
             ctx.close_path()
 
-        ctx.set_source_rgb(*palette[-2])
+        ctx.set_source_rgb(*stylesheet.color(-2))
         draw_lateral(FG.coords)
         draw_lateral(BC.coords)
         ctx.fill()
 
-        ctx.set_source_rgb(*palette[-4])
+        ctx.set_source_rgb(*stylesheet.color(-4))
         draw_lateral(CD.coords)
         draw_lateral(GH.coords)
         ctx.fill()
 
         # Lateral face of sub-system
-        ctx.set_source_rgb(*palette[1])
+        ctx.set_source_rgb(*stylesheet.color(1))
         points = chain(
             starmap(self.pf_inf, self.Γ_visible.coords),
             starmap(self.pf_sup, self.Γ_visible.coords[::-1]),
@@ -121,7 +121,7 @@ class ShellWithSubSystem:
         ctx.fill()
 
         # Iso-lines, outer system
-        ctx.set_line_width(params["line width"]["thin"])
+        ctx.set_line_width(stylesheet.line_width("thin"))
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
         for iso, index, bound in [(iso_u, 1, self.v_cut), (iso_v, 0, self.u_cut)]:
@@ -135,7 +135,7 @@ class ShellWithSubSystem:
         ctx.stroke()
 
         # Upper and lower faces of outer system
-        ctx.set_line_width(params["line width"]["normal"])
+        ctx.set_line_width(stylesheet.line_width("normal"))
         points = starmap(self.pf_sup, self.Σ.exterior.difference(self.Γ).coords)
         ctx.move_to(*next(points))
         for x, y in points:
@@ -151,8 +151,8 @@ class ShellWithSubSystem:
         ctx.stroke()
 
         # Mid surface
-        ctx.set_line_width(params["line width"]["thin"])
-        ctx.set_source_rgb(*palette[4])
+        ctx.set_line_width(stylesheet.line_width("thin"))
+        ctx.set_source_rgb(*stylesheet.color(4))
         points = starmap(
             self.pf_mid,
             chain(FG.coords, GH.coords, self.Γ.exterior.difference(self.Σ).coords),
@@ -167,7 +167,7 @@ class ShellWithSubSystem:
         ctx.stroke()
 
         # Fibers of outer system
-        ctx.set_line_width(params["line width"]["normal"])
+        ctx.set_line_width(stylesheet.line_width("normal"))
         ctx.set_source_rgb(0.0, 0.0, 0.0)
         for u_, v_ in [
             (self.u_max, self.v_min),
@@ -180,13 +180,13 @@ class ShellWithSubSystem:
         ctx.stroke()
 
         # Sub-system
-        ctx.set_source_rgb(*palette[0])
+        ctx.set_source_rgb(*stylesheet.color(0))
         draw_polyline(ctx, starmap(self.pf_sup, self.Γ.exterior.coords))
         draw_polyline(ctx, starmap(self.pf_inf, self.Γ_visible.coords))
         ctx.stroke()
 
         # Sub-system iso-[u, v] lines and fibers
-        ctx.set_line_width(params["line width"]["thin"])
+        ctx.set_line_width(stylesheet.line_width("thin"))
 
         for iso in (iso_u, iso_v):
             ls = iso.intersection(self.Γ)
@@ -199,7 +199,7 @@ class ShellWithSubSystem:
         ctx.stroke()
 
         u2d = ctx.user_to_device
-        ctx.set_line_width(params["line width"]["thin"])
+        ctx.set_line_width(stylesheet.line_width("thin"))
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
         if labels is None:
@@ -246,7 +246,7 @@ class ShellWithSubSystem:
         ctx.stroke()
 
 
-def main(params):
+def main():
     basename = "fig20210105175723"
     shell = default_shell(plate=True, constant_thickness=False)
     border = Ellipse(7.0, 10.0)
@@ -269,6 +269,6 @@ def main(params):
     with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
         ctx = init_context(surface)
         labels = []
-        drawing.draw_bare(ctx, labels, params)
+        drawing.draw_bare(ctx, labels)
 
     insert_labels(basename, labels)

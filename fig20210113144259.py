@@ -4,12 +4,14 @@ import cairo
 import numpy as np
 import shapely
 
+import stylesheet
+
 from geometry import default_shell, project
 from labelling import Label, insert_labels
 from pycairo_utils import draw_arrow, draw_frame, draw_polyline, init_context
 
 
-def main(params):
+def main():
     basename = "fig20210113144259"
     shell = default_shell(plate=True, constant_thickness=False)
 
@@ -22,13 +24,11 @@ def main(params):
     pf_inf = lambda u, v: project(*shell.f_inf(u, v))
     pf_mid = lambda u, v: project(*shell.f_mid(u, v))
 
-    palette = params["color"]["category20c"]
-
     with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
         ctx = init_context(surface)
-        ctx.set_line_width(params["line width"]["normal"])
+        ctx.set_line_width(stylesheet.line_width("normal"))
 
-        ctx.set_source_rgb(*palette[-1])
+        ctx.set_source_rgb(*stylesheet.color(-1))
         ctx.move_to(*pf_sup(u[0], v[0]))
         for u_ in u[1:]:
             ctx.line_to(*pf_sup(u_, v[0]))
@@ -42,7 +42,7 @@ def main(params):
         upper_surface = ctx.copy_path()
         ctx.fill()
 
-        ctx.set_source_rgb(*palette[-2])
+        ctx.set_source_rgb(*stylesheet.color(-2))
         ctx.move_to(*pf_inf(u[-1], v[0]))
         for v_ in v[1:]:
             ctx.line_to(*pf_inf(u[-1], v_))
@@ -52,7 +52,7 @@ def main(params):
         lateral_surface_100 = ctx.copy_path()
         ctx.fill()
 
-        ctx.set_source_rgb(*palette[-4])
+        ctx.set_source_rgb(*stylesheet.color(-4))
         ctx.move_to(*pf_inf(u[0], v[-1]))
         for u_ in u[1:]:
             ctx.line_to(*pf_inf(u_, v[-1]))
@@ -68,7 +68,7 @@ def main(params):
         ctx.append_path(lateral_surface_010)
         ctx.stroke()
 
-        ctx.set_source_rgb(*palette[4])
+        ctx.set_source_rgb(*stylesheet.color(4))
         ctx.move_to(*pf_mid(u[-1], v[0]))
         for v_ in v[1:]:
             ctx.line_to(*pf_mid(u[-1], v_))
@@ -76,7 +76,7 @@ def main(params):
             ctx.line_to(*pf_mid(u_, v[-1]))
         ctx.stroke()
 
-        ctx.set_source_rgba(*palette[8], 0.5)
+        ctx.set_source_rgba(*stylesheet.color(8), 0.5)
         FG = shapely.geometry.LineString(pf_sup(u_cut, v_) for v_ in v)
 
         x = 0.0
@@ -112,13 +112,13 @@ def main(params):
         cutting_plane = ctx.copy_path()
         ctx.fill()
 
-        ctx.set_line_width(params["line width"]["thin"])
-        ctx.set_source_rgb(*palette[8])
+        ctx.set_line_width(stylesheet.line_width("thin"))
+        ctx.set_source_rgb(*stylesheet.color(8))
         ctx.append_path(cutting_plane)
         ctx.stroke()
 
         ctx.set_source_rgb(0.0, 0.0, 0.0)
-        ctx.set_line_width(params["line width"]["thin"])
+        ctx.set_line_width(stylesheet.line_width("thin"))
         labels = []
         labels.append(
             Label(
@@ -191,7 +191,7 @@ def main(params):
                 y_upwards=False,
             )
         )
-        ctx.set_source_rgb(*palette[4])
+        ctx.set_source_rgb(*stylesheet.color(4))
         ctx.save()
         ctx.translate(30., 17.)
         draw_frame(ctx, labels)
