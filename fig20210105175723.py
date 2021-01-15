@@ -202,6 +202,9 @@ class ShellWithSubSystem:
         ctx.set_line_width(params["line width"]["thin"])
         ctx.set_source_rgb(0.0, 0.0, 0.0)
 
+        if labels is None:
+            return
+
         dx, dy = 5.0, 5.0
 
         x1, y1 = self.pf_sup(self.u_min + dx, self.v_min + dy)
@@ -242,32 +245,30 @@ class ShellWithSubSystem:
 
         ctx.stroke()
 
-        return labels
-
-    def draw(self, basename, params):
-        with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
-            ctx = init_context(surface)
-            labels = []
-            self.draw_bare(ctx, labels, params)
-
-        insert_labels(basename, labels)
-
 
 def main(params):
     basename = "fig20210105175723"
     shell = default_shell(plate=True, constant_thickness=False)
     border = Ellipse(7.0, 10.0)
 
-    u_min, u_max, u_cut = -15.0, 15.0, 0.0
-    v_min, v_max, v_cut = -20.0, 20.0, 0.0
+    u = np.linspace(-15.0, 15.0, num=51)
+    v = np.linspace(-20.0, 20.0, num=51)
+    t = np.linspace(0.0, 2 * np.pi, num=51)
+    u_cut, v_cut = 0.0, 0.0
 
     drawing = ShellWithSubSystem(
         shell,
         border,
-        np.linspace(u_min, u_max, num=51),
-        np.linspace(v_min, v_max, num=51),
-        np.linspace(0.0, 2 * np.pi, num=51),
+        u,
+        v,
+        t,
         u_cut,
         v_cut,
     )
-    drawing.draw(basename, params)
+
+    with cairo.PDFSurface(basename + "-bare.pdf", 1, 1) as surface:
+        ctx = init_context(surface)
+        labels = []
+        drawing.draw_bare(ctx, labels, params)
+
+    insert_labels(basename, labels)
