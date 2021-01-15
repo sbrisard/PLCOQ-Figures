@@ -13,20 +13,12 @@ from labelling import Label, insert_labels
 from pycairo_utils import draw_frame, draw_polyline
 
 
-def main():
-    basename = "fig20210113144259"
-    shell = default_shell(plate=True, constant_thickness=False)
-
-    u = np.linspace(-15.0, 15.0, num=51)
-    v = np.linspace(-20.0, 20.0, num=51)
-
-    u_cut = 0.0
-
+def draw_left(shell, u, v, u_cut, basename):
     pf_sup = lambda u, v: project(*shell.f_sup(u, v))
     pf_inf = lambda u, v: project(*shell.f_inf(u, v))
     pf_mid = lambda u, v: project(*shell.f_mid(u, v))
 
-    filename = stylesheet.full_path(basename+"-bare.pdf")
+    filename = stylesheet.full_path(basename + "-bare.pdf")
     with cairo.PDFSurface(filename, 1, 1) as surface:
         ctx = stylesheet.init_cairo_context(surface)
         ctx.set_line_width(stylesheet.line_width("normal"))
@@ -201,3 +193,54 @@ def main():
         ctx.restore()
 
     insert_labels(basename, labels)
+
+
+def draw_right(u, v, basename):
+    filename = stylesheet.full_path(basename + "-bare.pdf")
+    with cairo.PDFSurface(filename, 1, 1) as surface:
+        ctx = stylesheet.init_cairo_context(surface)
+        ctx.set_line_width(stylesheet.line_width("thick"))
+        uv = [
+            (u[-1], v[0]),
+            (u[-1], v[-1]),
+            (u[0], v[-1]),
+            (u[0], v[0]),
+        ]
+        xy = (project(u_, v_, 0.0) for u_, v_ in uv)
+        draw_polyline(ctx, xy)
+        ctx.close_path()
+        plate = ctx.copy_path()
+        ctx.stroke()
+
+        ctx.set_source_rgb(*stylesheet.color("system", "light"))
+        ctx.append_path(plate)
+        ctx.fill()
+
+        ctx.set_line_width(stylesheet.line_width("thin"))
+        ctx.set_source_rgb(*stylesheet.color("unit-vector"))
+        labels = []
+        draw_frame(ctx, labels)
+
+        labels.append(
+            Label(
+                r"\(\Sigma\)",
+                ctx.user_to_device(*project(0.75 * u[-1], 0.75 * v[0], 0.0)),
+                (0.5, 0.5),
+                y_upwards=False,
+            )
+        )
+
+    insert_labels(basename, labels)
+
+
+def main():
+    basename = "fig20210113144259"
+    shell = default_shell(plate=True, constant_thickness=False)
+
+    u = np.linspace(-15.0, 15.0, num=51)
+    v = np.linspace(-20.0, 20.0, num=51)
+
+    u_cut = 0.0
+
+    draw_left(shell, u, v, u_cut, basename + "-left")
+    draw_right(u, v, basename + "-right")
