@@ -4,6 +4,9 @@ Helper functions for drawing with PyCairo.
 import math
 import cairo
 
+from geometry import project
+from labelling import Label
+
 MM = 72.0 / 25.4
 
 
@@ -54,7 +57,48 @@ def draw_arrow(ctx, x1, y1, x2, y2):
     ctx.save()
     ctx.translate(x2, y2)
     ctx.rotate(angle)
-    draw_arrow_head(ctx, x2, y2, angle=angle)
+    draw_arrow_head(ctx)
     ctx.close_path()
     ctx.fill()
+
     ctx.restore()
+
+
+def draw_frame(ctx, labels=None):
+    r = 10.0
+    draw_arrow(ctx, 0.0, 0.0, *project(r, 0.0, 0.0))
+    draw_arrow(ctx, 0.0, 0.0, *project(0.0, r, 0.0))
+    draw_arrow(ctx, 0.0, 0.0, *project(0.0, 0.0, r))
+    if labels is not None:
+        color = "\\color[rgb]{{{:0.3f}, {:0.3f}, {:0.3f}}}".format(
+            *ctx.get_source().get_rgba()
+        )
+
+        x, y = project(0.5 * r, 0.0, 0.0)
+        labels.append(
+            Label(
+                color + r"\(\vec e_x\)",
+                ctx.user_to_device(x, y + 3.0),
+                (1.0, 1.0),
+                y_upwards=False,
+            )
+        )
+        x, y = project(0.0, 0.5 * r, 0.0)
+        print(ctx.user_to_device(x, y))
+        labels.append(
+            Label(
+                color + r"\(\vec e_y\)",
+                ctx.user_to_device(x, y + 3.0),
+                (0.0, 1.0),
+                y_upwards=False,
+            )
+        )
+        x, y = project(0.0, 0.0, r)
+        labels.append(
+            Label(
+                color + r"\(\vec e_z\)",
+                ctx.user_to_device(x + 1.0, y),
+                (0.0, 0.75),
+                y_upwards=False,
+            )
+        )

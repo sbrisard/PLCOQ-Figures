@@ -6,7 +6,7 @@ import shapely
 
 from geometry import default_shell, project
 from labelling import Label, insert_labels
-from pycairo_utils import draw_arrow, draw_polyline, init_context
+from pycairo_utils import draw_arrow, draw_frame, draw_polyline, init_context
 
 
 def main(params):
@@ -191,5 +191,10 @@ def main(params):
                 y_upwards=False,
             )
         )
+        ctx.set_source_rgb(*palette[4])
+        ctx.save()
+        ctx.translate(30., 17.)
+        draw_frame(ctx, labels)
+        ctx.restore()
 
     insert_labels(basename, labels)

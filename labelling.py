@@ -34,6 +34,7 @@ LATEX_CODE = """
 \\usepackage{{amsmath}}
 \\usepackage{{amssymb}}
 \\usepackage{{unicode-math}}
+\\usepackage{{xcolor}}
 \\setmainfont{{XITS}}
 \\setmathfont{{XITS Math}}
 \\AtBeginDocument{{
